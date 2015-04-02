@@ -1,3 +1,4 @@
+# Encoding: utf-8
 # Cloud Foundry Java Buildpack
 # Copyright 2013-2015 the original author or authors.
 #
@@ -13,17 +14,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Configuration for JRE repositories keyed by vendor
-# If Java 7 is required, permgen will be used instead of metaspace. Please see the documentation for more detail.
----
-repository_root: "{default.repository.root}/openjdk/{platform}/{architecture}"
-version: 1.8.0_25
-memory_sizes:
-  metaspace: 64m..
-  # permgen: 64m..
-memory_heuristics:
-  heap: 85
-  metaspace: 10
-  #permgen: 10
-  stack: 5
-  native: 10
+require 'java_buildpack/framework'
+
+module JavaBuildpack::Framework
+
+  # Adds a system property containing a timestamp of when the application was staged.
+  class StagingTimestamp < JavaBuildpack::Component::BaseComponent
+    def initialize(context)
+      super(context)
+    end
+
+    def detect
+      'staging-timestamp'
+    end
+
+    def compile
+    end
+
+    def release
+      @droplet.java_opts.add_system_property('staging.timestamp', "'#{Time.now}'")
+    end
+  end
+end
+
